@@ -58,14 +58,13 @@ export default {
     let lon , lat;
     if(navigator.geolocation){
      navigator.geolocation.getCurrentPosition(
-       position=>{
-         console.log(position.coords);
+       (position)=>{
          lon = position.coords.longitude;
          lat = position.coords.latitude;
-        this.getAddress(lat,lon).then(console.log).catch(console.error)
+        this.getAddress(lat,lon)
        },
-       err=>{
-         console.log(err)
+       (err)=>{
+         console.log('created error'+err)
        },{enableHighAccuracy: true}
      ); 
     }
@@ -75,29 +74,17 @@ export default {
     },
   methods:{
      getAddress (latitude, longitude) {
-    return new Promise(function (resolve, reject) {
-        let request = new XMLHttpRequest();
-
-        const method = 'GET';
-        const url = 'http://maps.googleapis.com/maps/api/geocode/json?latlng=' + latitude + ',' + longitude + '&sensor=true';
-        const async = true;
-
-        request.open(method, url, async);
-        request.onreadystatechange = function () {
-            if (request.readyState == 4) {
-                if (request.status == 200) {
-                    var data = JSON.parse(request.responseText);
-                    const address = data.results[0];
-                    this.query = address
-                    resolve(address);
-                }
-                else {
-                    reject(request.status);
-                }
-            }
-        };
-        request.send();
-    });
+    
+      fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`)
+        .then(res => {
+          return res.json()
+        }).then(data=>{ this.query = data.city !== '' ? data.city : data.continent 
+        this.fetchWeatherOfCurrent()})
+        
+        .catch(err=>{
+          console.log('error in fetch weather'+err)
+        });
+      
 },
     fetchWeather (e) {
       if(e.key == "Enter")
@@ -107,10 +94,22 @@ export default {
           return res.json();
         }).then(this.setResults)
         .catch(err=>{
-          console.log(err)
+          console.log('error in fetch weather'+err)
           this.notFound = true
         });
       }
+    },
+    fetchWeatherOfCurrent () {
+     
+        fetch(`${this.url_base}weather?q=${this.query}&units=metric&APPID=${this.api_key}`)
+        .then(res => {
+          return res.json();
+        }).then(this.setResults)
+        .catch(err=>{
+          console.log('error in fetch weather'+err)
+          this.notFound = true
+        });
+      
     },
     setResults (results) {
       this.weather = results;
