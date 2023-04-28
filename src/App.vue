@@ -62,7 +62,7 @@ export default {
          console.log(position.coords);
          lon = position.coords.longitude;
          lat = position.coords.latitude;
-        
+        console.log(lat,lon)
        },
        err=>{
          console.log(err)
