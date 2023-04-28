@@ -47,7 +47,7 @@ export default {
   data(){
     return{
       background:'cold',
-      api_key :process.env.API_KEY,
+      api_key :process.env.VUE_APP_API_KEY,
       url_base : 'https://api.openweathermap.org/data/2.5/',
       query :'',
       weather : {},
@@ -55,10 +55,14 @@ export default {
     }
   },
   created() {
+    let lon , lat;
     if(navigator.geolocation){
      navigator.geolocation.getCurrentPosition(
        position=>{
          console.log(position.coords);
+         lon = position.coords.longitude;
+         lat = position.coords.latitude;
+        
        },
        err=>{
          console.log(err)
