@@ -62,7 +62,7 @@ export default {
          console.log(position.coords);
          lon = position.coords.longitude;
          lat = position.coords.latitude;
-        console.log(lat,lon)
+        this.getAddress(lat,lon).then(console.log).catch(console.error)
        },
        err=>{
          console.log(err)
@@ -74,6 +74,31 @@ export default {
     }
     },
   methods:{
+     getAddress (latitude, longitude) {
+    return new Promise(function (resolve, reject) {
+        let request = new XMLHttpRequest();
+
+        const method = 'GET';
+        const url = 'http://maps.googleapis.com/maps/api/geocode/json?latlng=' + latitude + ',' + longitude + '&sensor=true';
+        const async = true;
+
+        request.open(method, url, async);
+        request.onreadystatechange = function () {
+            if (request.readyState == 4) {
+                if (request.status == 200) {
+                    var data = JSON.parse(request.responseText);
+                    const address = data.results[0];
+                    this.query = address
+                    resolve(address);
+                }
+                else {
+                    reject(request.status);
+                }
+            }
+        };
+        request.send();
+    });
+},
     fetchWeather (e) {
       if(e.key == "Enter")
       {
